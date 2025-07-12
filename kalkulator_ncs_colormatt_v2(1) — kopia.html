@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Kalkulator kolorów NCS – Color Matt</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; background: #f9f9f9; }
+    h1 { font-size: 22px; color: #333; }
+    label, p { margin: 10px 0; }
+    input[type="text"] { width: 100%; padding: 10px; margin-bottom: 10px; font-size: 16px; }
+    button { padding: 10px 15px; font-size: 16px; background-color: #ff6600; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    .result { margin-top: 20px; background: #fff; padding: 15px; border-radius: 5px; box-shadow: 0 0 5px #ccc; display: none; }
+    .product { margin-bottom: 12px; }
+    a.button { display: inline-block; margin-top: 10px; padding: 10px 15px; background: #ff6600; color: white; text-decoration: none; border-radius: 5px; }
+    .error { color: red; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<h1>Kalkulator kolorów NCS – Color Matt</h1>
+<label for="ncsInput">Wpisz kod koloru NCS (np. S 0502-Y lub 0502):</label>
+<input type="text" id="ncsInput" placeholder="Np. S 0502-Y lub 0502">
+<button onclick="calculatePrice()">Szukaj</button>
+
+<div class="result" id="result">
+  <div class="product"><strong>2.5L:</strong> <span id="price25"></span> zł  
+    <a id="buyLink25" class="button" href="#" target="_blank">Przejdź do zakupu 2.5L</a></div>
+  <div class="product"><strong>5L:</strong> <span id="price5"></span> zł  
+    <a id="buyLink5" class="button" href="#" target="_blank">Przejdź do zakupu 5L</a></div>
+  <div class="product"><strong>10L:</strong> <span id="price10"></span> zł  
+    <a id="buyLink10" class="button" href="#" target="_blank">Przejdź do zakupu 10L</a></div>
+</div>
+<div class="error" id="errorMsg"></div>
+
+<script>
+function calculatePrice() {
+  const input = document.getElementById("ncsInput").value.toUpperCase().trim();
+  const digits = input.replace(/[^0-9]/g, '').slice(0, 4);
+  const group = getGroup(parseInt(digits));
+  const errorMsg = document.getElementById("errorMsg");
+
+  if (!group) {
+    document.getElementById("result").style.display = "none";
+    errorMsg.innerText = "Nieprawidłowy kod NCS. Spróbuj np. S 0502-Y lub 0502.";
+    return;
+  }
+
+  // Linki oraz ceny — wklejone z Twojego sklepu (dla 6 grup)
+  const prices = {
+    1: { p25: "176,70", p5: "264,00", p10: "419,50",
+      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-2.5L/1341",
+      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-5L/1347",
+      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-10L/1353"
+    },
+    2: { p25: "206,60", p5: "309,10", p10: "489,10",
+      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-2.5L/1342",
+      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-5L/1348",
+      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-10L/1354"
+    },
+    3: { p25: "236,50", p5: "354,10", p10: "558,80",
+      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-2.5L/1343",
+      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-5L/1349",
+      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-10L/1355"
+    },
+    4: { p25: "256,40", p5: "384,80", p10: "598,40",
+      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-2.5L/1344",
+      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-5L/1350",
+      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-10L/1356"
+    },
+    5: { p25: "276,30", p5: "415,50", p10: "637,90",
+      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-2.5L/1345",
+      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-5L/1351",
+      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-10L/1357"
+    },
+    6: { p25: "296,20", p5: "446,20", p10: "677,30",
+      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-2.5L/1346",
+      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-5L/1352",
+      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-10L/1358"
+    },
+  };
+
+  const p = prices[group];
+  document.getElementById("price25").innerText = p.p25;
+  document.getElementById("price5").innerText = p.p5;
+  document.getElementById("price10").innerText = p.p10;
+  document.getElementById("buyLink25").href = p.link25;
+  document.getElementById("buyLink5").href = p.link5;
+  document.getElementById("buyLink10").href = p.link10;
+  document.getElementById("result").style.display = "block";
+  errorMsg.innerText = "";
+}
+
+// Tu prosty podział kodu NCS na grupy — możesz dopasować pod swoje kryteria!
+function getGroup(num) {
+  if (isNaN(num)) return null;
+  if (num < 1000) return 1;
+  if (num < 2000) return 2;
+  if (num < 4000) return 3;
+  if (num < 6000) return 4;
+  if (num < 8000) return 5;
+  return 6;
+}
+</script>
+
+</body>
+</html>
