@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Kalkulator kolorów NCS – Color Matt</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; background: #f9f9f9; }
+    h1 { font-size: 22px; color: #333; }
+    label, p { margin: 10px 0; }
+    input[type="text"] { width: 100%; padding: 10px; margin-bottom: 10px; font-size: 16px; }
+    button { padding: 10px 15px; font-size: 16px; background-color: #ff6600; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    .result { margin-top: 20px; background: #fff; padding: 15px; border-radius: 5px; box-shadow: 0 0 5px #ccc; display: none; }
+    .product { margin-bottom: 10px; }
+    a.button { display: inline-block; margin-top: 10px; padding: 10px 15px; background: #ff6600; color: white; text-decoration: none; border-radius: 5px; }
+    .error { color: red; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<h1>Kalkulator kolorów NCS – Color Matt</h1>
+<label for="ncsInput">Wpisz kod koloru NCS (np. S 0502-Y lub 0502):</label>
+<input type="text" id="ncsInput" placeholder="Np. S 0502-Y lub 0502">
+<button onclick="calculatePrice()">Szukaj</button>
+
+<div class="result" id="result">
+  <div class="product"><strong>2.5L:</strong> <span id="price25"></span> zł</div>
+  <div class="product"><strong>5L:</strong> <span id="price5"></span> zł</div>
+  <div class="product"><strong>10L:</strong> <span id="price10"></span> zł</div>
+  <a id="buyLink" class="button" href="#" target="_blank">Przejdź do zakupu</a>
+</div>
+<div class="error" id="errorMsg"></div>
+
+<script>
+function calculatePrice() {
+  const input = document.getElementById("ncsInput").value.toUpperCase().trim();
+  const digits = input.replace(/[^0-9]/g, '').slice(0, 4);
+  const group = getGroup(parseInt(digits));
+  const errorMsg = document.getElementById("errorMsg");
+
+  if (!group) {
+    document.getElementById("result").style.display = "none";
+    errorMsg.innerText = "Nieprawidłowy kod NCS. Spróbuj np. S 0502-Y lub 0502.";
+    return;
+  }
+
+  const prices = {
+    A: { p25: 139, p5: 259, p10: 459, link: "/pl/p/Color-Matt-NCS-Grupa-A/0001" },
+    B: { p25: 149, p5: 269, p10: 469, link: "/pl/p/Color-Matt-NCS-Grupa-B/0002" },
+    C: { p25: 159, p5: 279, p10: 479, link: "/pl/p/Color-Matt-NCS-Grupa-C/0003" },
+    D: { p25: 165, p5: 285, p10: 485, link: "/pl/p/Color-Matt-NCS-Grupa-D/0004" },
+    E: { p25: 175, p5: 295, p10: 499, link: "/pl/p/Color-Matt-NCS-Grupa-E/0005" },
+    F: { p25: 185, p5: 315, p10: 519, link: "/pl/p/Color-Matt-NCS-Grupa-F/0006" },
+  };
+
+  const p = prices[group];
+  document.getElementById("price25").innerText = p.p25;
+  document.getElementById("price5").innerText = p.p5;
+  document.getElementById("price10").innerText = p.p10;
+  document.getElementById("buyLink").href = p.link;
+  document.getElementById("result").style.display = "block";
+  errorMsg.innerText = "";
+}
+
+function getGroup(num) {
+  if (isNaN(num)) return null;
+  if (num < 1000) return "A";
+  if (num < 2000) return "B";
+  if (num < 4000) return "C";
+  if (num < 6000) return "D";
+  if (num < 8000) return "E";
+  return "F";
+}
+</script>
+
+</body>
+</html>
