@@ -1,0 +1,1 @@
+Kalkulator NCS – przygotowanie repozytorium.
