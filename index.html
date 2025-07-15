@@ -46,38 +46,38 @@ function calculatePrice() {
   }
 
   // Linki oraz ceny — wklejone z Twojego sklepu (dla 6 grup)
-  const prices = {
-    1: { p25: "176,70", p5: "264,00", p10: "419,50",
-      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-2.5L/1341",
-      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-5L/1347",
-      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-10L/1353"
-    },
-    2: { p25: "206,60", p5: "309,10", p10: "489,10",
-      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-2.5L/1342",
-      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-5L/1348",
-      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-10L/1354"
-    },
-    3: { p25: "236,50", p5: "354,10", p10: "558,80",
-      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-2.5L/1343",
-      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-5L/1349",
-      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-10L/1355"
-    },
-    4: { p25: "256,40", p5: "384,80", p10: "598,40",
-      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-2.5L/1344",
-      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-5L/1350",
-      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-10L/1356"
-    },
-    5: { p25: "276,30", p5: "415,50", p10: "637,90",
-      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-2.5L/1345",
-      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-5L/1351",
-      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-10L/1357"
-    },
-    6: { p25: "296,20", p5: "446,20", p10: "677,30",
-      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-2.5L/1346",
-      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-5L/1352",
-      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-10L/1358"
-    },
-  };
+const prices = {
+  1: { p25: "147,25", p5: "220,00", p10: "349,58",
+    link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-2.5L/1341",
+    link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-5L/1347",
+    link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-10L/1353"
+  },
+  2: { p25: "172,17", p5: "257,58", p10: "409,25",
+    link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-2.5L/1342",
+    link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-5L/1348",
+    link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-10L/1354"
+  },
+  3: { p25: "197,08", p5: "295,08", p10: "468,33",
+    link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-2.5L/1343",
+    link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-5L/1349",
+    link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-10L/1355"
+  },
+  4: { p25: "220,83", p5: "330,92", p10: "525,67",
+    link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-2.5L/1344",
+    link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-5L/1350",
+    link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-10L/1356"
+  },
+  5: { p25: "246,23", p5: "368,33", p10: "584,17",
+    link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-2.5L/1345",
+    link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-5L/1351",
+    link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-10L/1357"
+  },
+  6: { p25: "272,00", p5: "406,00", p10: "643,00",
+    link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-2.5L/1346",
+    link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-5L/1352",
+    link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-10L/1358"
+  },
+};
 
   const p = prices[group];
   document.getElementById("price25").innerText = p.p25;
