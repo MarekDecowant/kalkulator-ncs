@@ -13,13 +13,14 @@
     .product { margin-bottom: 12px; }
     a.button { display: inline-block; margin-top: 10px; padding: 10px 15px; background: #ff6600; color: white; text-decoration: none; border-radius: 5px; }
     .error { color: red; margin-top: 10px; }
+    #colorPreview { margin-top: 15px; }
   </style>
 </head>
 <body>
 
 <h1>Kalkulator kolorów NCS – Color Matt</h1>
-<label for="ncsInput">Wpisz kod koloru NCS (np. S 0502-Y lub 0502):</label>
-<input type="text" id="ncsInput" placeholder="Np. S 0502-Y lub 0502">
+<label for="ncsInput">Wpisz kod koloru NCS (np. S 0502-Y, S 2060-G30Y) lub numer z małego wzornika (np. 1, 023, 200):</label>
+<input type="text" id="ncsInput" placeholder="Np. S 0502-Y, S 2060-G30Y, 025">
 <button onclick="calculatePrice()">Szukaj</button>
 
 <div class="result" id="result">
@@ -29,55 +30,123 @@
     <a id="buyLink5" class="button" href="#" target="_blank">Przejdź do zakupu 5L</a></div>
   <div class="product"><strong>10L:</strong> <span id="price10"></span> zł  
     <a id="buyLink10" class="button" href="#" target="_blank">Przejdź do zakupu 10L</a></div>
+  <div id="colorPreview"></div>
 </div>
 <div class="error" id="errorMsg"></div>
 
 <script>
+// Grupa cenowa na podstawie numeru
+function getGroup(num) {
+  if (isNaN(num)) return null;
+  if (num < 1000) return 1;
+  if (num < 2000) return 2;
+  if (num < 4000) return 3;
+  if (num < 6000) return 4;
+  if (num < 8000) return 5;
+  return 6;
+}
+
+// Najważniejsze skróty barw w NCS
+const mainHues = [
+  'Y', 'R', 'B', 'G', 'N', 'YR', 'GY', 'BG', 'BR', 'GR', 'RB', 'V', 'YB'
+];
+
+// Walidacja NCS
+function isValidNCS(ncs) {
+  const regex = /^S?\s*\d{2}\d{2}-([A-Z]{1,2})(\d{1,2})?([A-Z]{0,2})$/;
+  let m = ncs.replace(/\s+/g, '').toUpperCase().match(regex);
+  if (!m) return false;
+  if (!mainHues.includes(m[1])) return false;
+  if (m[3] && m[3].length > 0 && !mainHues.includes(m[3])) return false;
+  return true;
+}
+
+// Czy to numer z małego wzornika (1-224), w dowolnym formacie
+function isSmallSample(code) {
+  // Jeśli podano 4 cyfry (np. 0300, 0502, 1000) – NIE jest to mały wzornik!
+  let c = code.replace(/\s+/g, '').toUpperCase();
+  if (/^\d{4}$/.test(c) || /^S?\d{4}$/.test(c)) return false;
+  // Jeśli tylko cyfry (1–3 cyfry), ew. z literą S, to sprawdzamy zakres 1–224
+  let m = c.match(/^S?0*([0-9]{1,3})$/);
+  if (!m) return false;
+  let val = parseInt(m[1], 10);
+  return val >= 1 && val <= 224;
+}
+
+// Automatyczna konwersja NCS na HEX (przybliżona)
+function ncsToHex(ncs) {
+  ncs = ncs.toUpperCase().replace(/\s+/g, '');
+  if (ncs.match(/^S?\d{4}(-[A-Z]+(\d{1,2})?[A-Z]*)?$/)) {
+    if (!ncs.includes('-')) ncs += '-N';
+  }
+  let match = ncs.match(/(\d{2})(\d{2})-([A-Z]{1,2})(\d{0,2})?([A-Z]{0,2})/);
+  if (!match) return "#eeeeee";
+  let lightness = parseInt(match[1]);
+  let chroma = parseInt(match[2]);
+  let hue1 = match[3];
+  let perc = parseInt(match[4] || "0");
+  let hue2 = match[5] || '';
+  const base = {
+    N: [220,220,220], Y: [255,245,80], R: [240,50,50], B: [80,160,255], G: [80,220,120]
+  };
+  let rgb1 = base[hue1[0]] || [255,255,255];
+  let rgb2 = base[hue2[0]] || [255,255,255];
+  let p = isNaN(perc) ? 0 : perc/100;
+  let rgb = rgb1.map((c,i) => Math.round(c*(1-p) + rgb2[i]*p));
+  let gray = Math.round(255 * (1 - lightness/100));
+  let sat = chroma/100;
+  rgb = rgb.map(c => Math.round(c*sat + gray*(1-sat)));
+  return '#' + rgb.map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+
 function calculatePrice() {
-  const input = document.getElementById("ncsInput").value.toUpperCase().trim();
-  const digits = input.replace(/[^0-9]/g, '').slice(0, 4);
+  const input = document.getElementById("ncsInput").value.trim();
+  const inputUpper = input.toUpperCase();
+  const digits = inputUpper.replace(/[^0-9]/g, '').slice(0, 4);
   const group = getGroup(parseInt(digits));
   const errorMsg = document.getElementById("errorMsg");
+  const colorPreview = document.getElementById("colorPreview");
 
   if (!group) {
     document.getElementById("result").style.display = "none";
-    errorMsg.innerText = "Nieprawidłowy kod NCS. Spróbuj np. S 0502-Y lub 0502.";
+    errorMsg.innerText = "Nieprawidłowy kod NCS. Spróbuj np. S 0502-Y lub S 2060-G30Y.";
+    colorPreview.innerHTML = '';
     return;
   }
 
-  // Linki oraz ceny — wklejone z Twojego sklepu (dla 6 grup)
-const prices = {
-  1: { p25: "147,25", p5: "220,00", p10: "349,58",
-    link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-2.5L/1341",
-    link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-5L/1347",
-    link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-10L/1353"
-  },
-  2: { p25: "172,17", p5: "257,58", p10: "409,25",
-    link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-2.5L/1342",
-    link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-5L/1348",
-    link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-10L/1354"
-  },
-  3: { p25: "197,08", p5: "295,08", p10: "468,33",
-    link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-2.5L/1343",
-    link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-5L/1349",
-    link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-10L/1355"
-  },
-  4: { p25: "220,83", p5: "330,92", p10: "525,67",
-    link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-2.5L/1344",
-    link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-5L/1350",
-    link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-10L/1356"
-  },
-  5: { p25: "246,23", p5: "368,33", p10: "584,17",
-    link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-2.5L/1345",
-    link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-5L/1351",
-    link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-10L/1357"
-  },
-  6: { p25: "272,00", p5: "406,00", p10: "643,00",
-    link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-2.5L/1346",
-    link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-5L/1352",
-    link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-10L/1358"
-  },
-};
+  // Ceny i linki
+  const prices = {
+    1: { p25: "147,25", p5: "220,00", p10: "349,58",
+      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-2.5L/1341",
+      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-5L/1347",
+      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-10L/1353"
+    },
+    2: { p25: "172,17", p5: "257,58", p10: "409,25",
+      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-2.5L/1342",
+      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-5L/1348",
+      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-10L/1354"
+    },
+    3: { p25: "197,08", p5: "295,08", p10: "468,33",
+      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-2.5L/1343",
+      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-5L/1349",
+      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-10L/1355"
+    },
+    4: { p25: "220,83", p5: "330,92", p10: "525,67",
+      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-2.5L/1344",
+      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-5L/1350",
+      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-10L/1356"
+    },
+    5: { p25: "246,23", p5: "368,33", p10: "584,17",
+      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-2.5L/1345",
+      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-5L/1351",
+      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-10L/1357"
+    },
+    6: { p25: "272,00", p5: "406,00", p10: "643,00",
+      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-2.5L/1346",
+      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-5L/1352",
+      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-10L/1358"
+    },
+  };
 
   const p = prices[group];
   document.getElementById("price25").innerText = p.p25;
@@ -88,17 +157,40 @@ const prices = {
   document.getElementById("buyLink10").href = p.link10;
   document.getElementById("result").style.display = "block";
   errorMsg.innerText = "";
-}
 
-// Tu prosty podział kodu NCS na grupy — możesz dopasować pod swoje kryteria!
-function getGroup(num) {
-  if (isNaN(num)) return null;
-  if (num < 1000) return 1;
-  if (num < 2000) return 2;
-  if (num < 4000) return 3;
-  if (num < 6000) return 4;
-  if (num < 8000) return 5;
-  return 6;
+  // 1. Sprawdź czy to numer z małego wzornika (1–224, ale nie 4 cyfry!)
+  if (isSmallSample(inputUpper)) {
+    colorPreview.innerHTML = `
+      <div style="font-size: 14px; color: #b00; margin-top:8px;">
+        Kolor z małego wzornika Color Matt – podgląd niedostępny
+      </div>
+    `;
+    return;
+  }
+
+  // 2. Walidacja kodu NCS: tylko poprawne barwy i format
+  if (isValidNCS(inputUpper) || /^\d{4}$/.test(inputUpper) || /^S?\d{4}$/.test(inputUpper)) {
+    // Umożliwia wpisanie np. "0300", "1000", "S0300" itp.
+    let ncsCode = inputUpper;
+    if (/^\d{4}$/.test(inputUpper)) ncsCode = inputUpper + "-N";
+    if (/^S?\d{4}$/.test(inputUpper)) ncsCode = inputUpper.replace(/^S?/,'') + "-N";
+    const hex = ncsToHex(ncsCode);
+    colorPreview.innerHTML = `
+      <div style="width:90px; height:36px; background:${hex}; border:1px solid #aaa; border-radius:6px;"></div>
+      <div style="font-size: 13px; margin-top: 6px;">
+        Podgląd koloru: <b>${inputUpper}</b>
+        <br><span style="font-size:11px; color:#888;">Kolor poglądowy – generowany automatycznie (nie jest wzornikiem NCS)</span>
+      </div>
+    `;
+  } else {
+    // 3. Wszystko inne – błąd
+    colorPreview.innerHTML = `
+      <div style="font-size: 14px; color: #b00; margin-top:8px;">
+        Nieprawidłowy kod NCS lub barwa.<br>
+        Przykład: <b>S 0502-Y</b> lub <b>S 2060-G30Y</b>
+      </div>
+    `;
+  }
 }
 </script>
 
