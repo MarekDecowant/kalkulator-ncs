@@ -46,12 +46,10 @@ function getGroup(num) {
   return 6;
 }
 
-// Najważniejsze skróty barw w NCS
 const mainHues = [
-  'Y', 'R', 'B', 'G', 'N', 'YR', 'GY', 'BG', 'BR', 'GR', 'RB', 'V', 'YB'
+  'N', 'Y', 'R', 'B', 'G', 'YR', 'GY', 'BG', 'BR', 'GR', 'RB', 'V', 'YB'
 ];
 
-// Walidacja NCS
 function isValidNCS(ncs) {
   const regex = /^S?\s*\d{2}\d{2}-([A-Z]{1,2})(\d{1,2})?([A-Z]{0,2})$/;
   let m = ncs.replace(/\s+/g, '').toUpperCase().match(regex);
@@ -63,10 +61,8 @@ function isValidNCS(ncs) {
 
 // Czy to numer z małego wzornika (1-224), w dowolnym formacie
 function isSmallSample(code) {
-  // Jeśli podano 4 cyfry (np. 0300, 0502, 1000) – NIE jest to mały wzornik!
   let c = code.replace(/\s+/g, '').toUpperCase();
-  if (/^\d{4}$/.test(c) || /^S?\d{4}$/.test(c)) return false;
-  // Jeśli tylko cyfry (1–3 cyfry), ew. z literą S, to sprawdzamy zakres 1–224
+  if (/^S?\d{4}$/.test(c)) return false;
   let m = c.match(/^S?0*([0-9]{1,3})$/);
   if (!m) return false;
   let val = parseInt(m[1], 10);
@@ -76,6 +72,7 @@ function isSmallSample(code) {
 // Automatyczna konwersja NCS na HEX (przybliżona)
 function ncsToHex(ncs) {
   ncs = ncs.toUpperCase().replace(/\s+/g, '');
+  if (/^S?\d{4}$/.test(ncs)) ncs = ncs.replace(/^S?/,'') + "-N";
   if (ncs.match(/^S?\d{4}(-[A-Z]+(\d{1,2})?[A-Z]*)?$/)) {
     if (!ncs.includes('-')) ncs += '-N';
   }
@@ -99,9 +96,28 @@ function ncsToHex(ncs) {
   return '#' + rgb.map(x=>x.toString(16).padStart(2,'0')).join('');
 }
 
+// PODPOWIEDZI: 2 najbardziej typowe
+function getSuggestions(input) {
+  let c = input.replace(/\s+/g, '').toUpperCase();
+  if (/^S?\d{4}$/.test(c)) return ['S ' + c.replace(/^S?/,'') + '-N'];
+  let fourDigits = c.match(/^S?(\d{4})(.*)$/);
+  if (fourDigits && fourDigits[2].length < 4) {
+    return [
+      'S ' + fourDigits[1] + '-N',
+      'S ' + fourDigits[1] + '-Y'
+    ];
+  }
+  let digitsAndSuffix = c.match(/^S?(\d{4})-([A-Z]*)$/);
+  if (digitsAndSuffix && !mainHues.includes(digitsAndSuffix[2])) {
+    return mainHues.slice(0, 2).map(h => 'S ' + digitsAndSuffix[1] + '-' + h);
+  }
+  return [];
+}
+
 function calculatePrice() {
   const input = document.getElementById("ncsInput").value.trim();
-  const inputUpper = input.toUpperCase();
+  const inputNoSpaces = input.replace(/\s+/g, '');
+  const inputUpper = inputNoSpaces.toUpperCase();
   const digits = inputUpper.replace(/[^0-9]/g, '').slice(0, 4);
   const group = getGroup(parseInt(digits));
   const errorMsg = document.getElementById("errorMsg");
@@ -168,26 +184,33 @@ function calculatePrice() {
     return;
   }
 
-  // 2. Walidacja kodu NCS: tylko poprawne barwy i format
-  if (isValidNCS(inputUpper) || /^\d{4}$/.test(inputUpper) || /^S?\d{4}$/.test(inputUpper)) {
-    // Umożliwia wpisanie np. "0300", "1000", "S0300" itp.
-    let ncsCode = inputUpper;
-    if (/^\d{4}$/.test(inputUpper)) ncsCode = inputUpper + "-N";
-    if (/^S?\d{4}$/.test(inputUpper)) ncsCode = inputUpper.replace(/^S?/,'') + "-N";
-    const hex = ncsToHex(ncsCode);
+  // 2. Walidacja kodu NCS: tylko poprawne barwy i format (z S lub bez S)
+  let ncsCode = inputUpper;
+  let ncsCodeWithS = ncsCode.startsWith('S') ? ncsCode : 'S' + ncsCode;
+  // jeśli ktoś wpisał "0502-Y", "1000-N" itp. – zaakceptuj, ale pokaż podpowiedź
+  if (isValidNCS(ncsCodeWithS)) {
+    const hex = ncsToHex(ncsCodeWithS);
     colorPreview.innerHTML = `
       <div style="width:90px; height:36px; background:${hex}; border:1px solid #aaa; border-radius:6px;"></div>
       <div style="font-size: 13px; margin-top: 6px;">
-        Podgląd koloru: <b>${inputUpper}</b>
+        Podgląd koloru: <b>${ncsCodeWithS}</b>
         <br><span style="font-size:11px; color:#888;">Kolor poglądowy – generowany automatycznie (nie jest wzornikiem NCS)</span>
+        ${ncsCode.startsWith('S') ? '' : '<div style="color:#e67e22;margin-top:7px;">Oficjalny kod NCS zaczyna się od litery S.<br>Proponujemy: <b>S ' + ncsCode + '</b></div>'}
       </div>
     `;
   } else {
-    // 3. Wszystko inne – błąd
+    // 3. Wszystko inne – błąd i propozycje
+    const suggestions = getSuggestions(inputUpper);
     colorPreview.innerHTML = `
       <div style="font-size: 14px; color: #b00; margin-top:8px;">
         Nieprawidłowy kod NCS lub barwa.<br>
-        Przykład: <b>S 0502-Y</b> lub <b>S 2060-G30Y</b>
+        Przykład: <b>S 0502-Y</b> lub <b>S 2060-G30Y</b><br>
+        ${suggestions.length > 0 ? `
+          <span style="color:#444;">
+            Czy chodziło Ci o:<br>
+            ${suggestions.map(s => `<b>${s}</b>`).join(' lub<br>')}
+          </span>` : ''
+        }
       </div>
     `;
   }
