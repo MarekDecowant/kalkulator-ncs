@@ -1,42 +1,120 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Kalkulator kolorów NCS – Color Matt</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; background: #f9f9f9; }
-    h1 { font-size: 22px; color: #333; }
-    label, p { margin: 10px 0; }
-    input[type="text"] { width: 100%; padding: 10px; margin-bottom: 10px; font-size: 16px; }
-    button { padding: 10px 15px; font-size: 16px; background-color: #ff6600; color: white; border: none; border-radius: 5px; cursor: pointer; }
-    .result { margin-top: 20px; background: #fff; padding: 15px; border-radius: 5px; box-shadow: 0 0 5px #ccc; display: none; }
-    .product { margin-bottom: 12px; }
-    a.button { display: inline-block; margin-top: 10px; padding: 10px 15px; background: #ff6600; color: white; text-decoration: none; border-radius: 5px; }
-    .error { color: red; margin-top: 10px; }
-    #colorPreview { margin-top: 15px; }
+    :root{
+      --brand-orange:#ff6600;
+      --brand-green:#2e7d32;
+      --text:#333;
+      --bg:#f9f9f9;
+      --card:#fff;
+      --muted:#888;
+      --shadow:0 8px 20px rgba(0,0,0,.06);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      font-family: Arial, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", sans-serif;
+      padding: 24px; margin: 0 auto; max-width: 720px; background: var(--bg); color: var(--text);
+    }
+    .app{ background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px; }
+    header{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom: 18px; }
+    .logo{ display:flex; align-items:center; gap:10px; }
+    .logo svg{ height:36px }
+    h1{ font-size: 22px; margin: 8px 0 0; color: var(--text); }
+    p.lead{ margin: 8px 0 18px; color:#444 }
+    label{ font-weight:600; display:block; margin-bottom:8px }
+    .controls{ display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center; }
+    input[type="text"]{
+      width:100%; padding:12px 12px; font-size:16px; border:1px solid #ddd; border-radius:10px;
+      outline:none; transition:border .15s ease, box-shadow .15s ease;
+    }
+    input[type="text"]:focus{ border-color: var(--brand-green); box-shadow: 0 0 0 3px rgba(46,125,50,.12); }
+    button{
+      padding:12px 16px; font-size:16px; background: var(--brand-orange); color:#fff; border:none;
+      border-radius:10px; cursor:pointer; transition: transform .05s ease, box-shadow .15s ease;
+      box-shadow: 0 4px 12px rgba(255,102,0,.25);
+    }
+    button:active{ transform: translateY(1px) }
+    .hint{ font-size:13px; color:#555; margin-top:8px }
+    .result{ margin-top: 18px; background: var(--card); padding: 14px; border-radius: 12px; box-shadow: var(--shadow); display:none; }
+    .product{ display:flex; align-items:center; gap:10px; margin: 10px 0 }
+    .product strong{ min-width:58px }
+    .product a.button{ display:inline-block; padding:10px 12px; background: var(--brand-orange); color:#fff; text-decoration:none;
+      border-radius:9px; font-size:14px; white-space:nowrap; }
+    .preview{ display:flex; align-items:center; gap:12px; margin-top:10px; }
+    .swatch{ width:90px; height:38px; border:1px solid #aaa; border-radius:8px; background:#eee; }
+    .muted{ font-size:11px; color: var(--muted) }
+    .error{ color:#b00020; margin-top:10px }
+    .bar{ height:6px; background:linear-gradient(90deg, var(--brand-green), var(--brand-orange)); border-radius:999px; margin: 8px 0 16px; }
+    .footnote{ font-size:12px; color:#666; margin-top:8px }
   </style>
 </head>
 <body>
 
-<h1>Kalkulator kolorów NCS – Color Matt</h1>
-<label for="ncsInput">Wpisz kod koloru NCS (np. S 0502-Y, S 2060-G30Y) lub numer z małego wzornika (np. 1, 023, 200):</label>
-<input type="text" id="ncsInput" placeholder="Np. S 0502-Y, S 2060-G30Y, 025">
-<button onclick="calculatePrice()">Szukaj</button>
+<div class="app">
+  <header>
+    <div class="logo" aria-label="Decowant">
+      <!-- Zamień SVG na <img src="URL" alt="Decowant"> jeśli masz plik -->
+      <svg viewBox="0 0 220 40" aria-hidden="true">
+        <rect x="0" y="0" width="220" height="40" rx="8" fill="#2e7d32" opacity=".08"/>
+        <text x="12" y="27" font-size="22" font-family="Arial" fill="#2e7d32" font-weight="700">Decowant</text>
+      </svg>
+    </div>
+    <div class="logo" aria-label="Fox Dekorator">
+      <!-- Zamień SVG na <img src="URL" alt="Fox Dekorator"> jeśli masz plik -->
+      <svg viewBox="0 0 220 40" aria-hidden="true">
+        <rect x="0" y="0" width="220" height="40" rx="8" fill="#ff6600" opacity=".08"/>
+        <text x="12" y="27" font-size="22" font-family="Arial" fill="#ff6600" font-weight="700">FOX Dekorator</text>
+      </svg>
+    </div>
+  </header>
 
-<div class="result" id="result">
-  <div class="product"><strong>2.5L:</strong> <span id="price25"></span> zł  
-    <a id="buyLink25" class="button" href="#" target="_blank">Przejdź do zakupu 2.5L</a></div>
-  <div class="product"><strong>5L:</strong> <span id="price5"></span> zł  
-    <a id="buyLink5" class="button" href="#" target="_blank">Przejdź do zakupu 5L</a></div>
-  <div class="product"><strong>10L:</strong> <span id="price10"></span> zł  
-    <a id="buyLink10" class="button" href="#" target="_blank">Przejdź do zakupu 10L</a></div>
-  <div id="colorPreview"></div>
+  <h1>Kalkulator kolorów NCS – Color Matt</h1>
+  <div class="bar" aria-hidden="true"></div>
+
+  <p class="lead">Wpisz kod NCS (np. <b>S 0502-Y</b>, <b>S 2060-G30Y</b>) albo numer z małego wzornika (np. <b>1</b>, <b>023</b>, <b>200</b>). Podgląd jest poglądowy.</p>
+
+  <form id="calcForm" novalidate>
+    <label for="ncsInput">Kod NCS lub numer z małego wzornika</label>
+    <div class="controls">
+      <input type="text" id="ncsInput" list="ncsList" placeholder="Np. S 0502-Y, S 2060-G30Y, 025" autocomplete="off" />
+      <button type="submit">Szukaj</button>
+    </div>
+    <datalist id="ncsList"><!-- uzupełniane dynamicznie --></datalist>
+    <div class="hint">Przy <b>chroma = 00</b> (np. 8000) jedynym poprawnym sufiksem jest <b>-N</b>. Po wpisaniu 4 cyfr uzupełnimy: <b>-N</b> dla XX00, w pozostałych przypadkach <b>-Y</b>. Dla sąsiadów (np. Y↔R) podpowiadamy warianty z procentem, np. <b>Y50R</b>.</div>
+  </form>
+
+  <div class="result" id="result" aria-live="polite">
+    <div class="product"><strong>2.5L:</strong> <span id="price25"></span> zł
+      <a id="buyLink25" class="button" href="#" target="_blank" rel="noopener noreferrer">Przejdź do zakupu 2.5L</a>
+    </div>
+    <div class="product"><strong>5L:</strong> <span id="price5"></span> zł
+      <a id="buyLink5" class="button" href="#" target="_blank" rel="noopener noreferrer">Przejdź do zakupu 5L</a>
+    </div>
+    <div class="product"><strong>10L:</strong> <span id="price10"></span> zł
+      <a id="buyLink10" class="button" href="#" target="_blank" rel="noopener noreferrer">Przejdź do zakupu 10L</a>
+    </div>
+
+    <div class="preview" id="colorPreview">
+      <div class="swatch"></div>
+      <div>
+        <div id="previewLabel"></div>
+        <div class="muted">Kolor poglądowy – generowany automatycznie (nie jest wzornikiem NCS).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="error" id="errorMsg" role="alert" aria-live="assertive"></div>
+  <div class="footnote">Na kartach produktów cena/wybór grupy są ustalone – kalkulator pomaga dobrać właściwą kartę i pamięta Twój kod.</div>
 </div>
-<div class="error" id="errorMsg"></div>
 
 <script>
-// Grupa cenowa na podstawie numeru
-function getGroup(num) {
+/* ===================== CENY I GRUPA ===================== */
+function getGroup(num){
   if (isNaN(num)) return null;
   if (num < 1000) return 1;
   if (num < 2000) return 2;
@@ -45,176 +123,322 @@ function getGroup(num) {
   if (num < 8000) return 5;
   return 6;
 }
+const PRICES = {
+  1: { p25: "147,25", p5: "220,00", p10: "349,58",
+       link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-2.5L/1341",
+       link5:  "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-5L/1347",
+       link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-10L/1353" },
+  2: { p25: "172,17", p5: "257,58", p10: "409,25",
+       link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-2.5L/1342",
+       link5:  "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-5L/1348",
+       link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-10L/1354" },
+  3: { p25: "197,08", p5: "295,08", p10: "468,33",
+       link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-2.5L/1343",
+       link5:  "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-5L/1349",
+       link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-10L/1355" },
+  4: { p25: "220,83", p5: "330,92", p10: "525,67",
+       link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-2.5L/1344",
+       link5:  "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-5L/1350",
+       link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-10L/1356" },
+  5: { p25: "246,23", p5: "368,33", p10: "584,17",
+       link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-2.5L/1345",
+       link5:  "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-5L/1351",
+       link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-10L/1357" },
+  6: { p25: "272,00", p5: "406,00", p10: "643,00",
+       link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-2.5L/1346",
+       link5:  "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-5L/1352",
+       link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-10L/1358" }
+};
 
-const mainHues = [
-  'N', 'Y', 'R', 'B', 'G', 'YR', 'GY', 'BG', 'BR', 'GR', 'RB', 'V', 'YB'
-];
+/* ===================== WALIDACJA NCS (00 ⇔ N) ===================== */
+const baseHues = ["Y","R","B","G"];
+const neighborPairs = new Set(["YR","RY","RB","BR","BG","GB","GY","YG"]);
 
-function isValidNCS(ncs) {
-  const regex = /^S?\s*\d{2}\d{2}-([A-Z]{1,2})(\d{1,2})?([A-Z]{0,2})$/;
-  let m = ncs.replace(/\s+/g, '').toUpperCase().match(regex);
-  if (!m) return false;
-  if (!mainHues.includes(m[1])) return false;
-  if (m[3] && m[3].length > 0 && !mainHues.includes(m[3])) return false;
-  return true;
-}
+function parseNCS(raw){
+  const s = (raw || "").toUpperCase().replace(/\s+/g, '');
+  const m = s.match(/^S?(\d{4})-([A-Z]{1,2})(\d{1,2})?([A-Z])?$/);
+  if (!m) return { valid:false };
 
-// Czy to numer z małego wzornika (1-224), w dowolnym formacie
-function isSmallSample(code) {
-  let c = code.replace(/\s+/g, '').toUpperCase();
-  if (/^S?\d{4}$/.test(c)) return false;
-  let m = c.match(/^S?0*([0-9]{1,3})$/);
-  if (!m) return false;
-  let val = parseInt(m[1], 10);
-  return val >= 1 && val <= 224;
-}
-
-// Automatyczna konwersja NCS na HEX (przybliżona)
-function ncsToHex(ncs) {
-  ncs = ncs.toUpperCase().replace(/\s+/g, '');
-  if (/^S?\d{4}$/.test(ncs)) ncs = ncs.replace(/^S?/,'') + "-N";
-  if (ncs.match(/^S?\d{4}(-[A-Z]+(\d{1,2})?[A-Z]*)?$/)) {
-    if (!ncs.includes('-')) ncs += '-N';
+  const bn = parseInt(m[1].slice(0,2),10);
+  const cn = parseInt(m[1].slice(2,4),10);
+  if ([bn,cn].some(isNaN) || bn < 0 || bn > 99 || cn < 0 || cn > 99 || (bn + cn > 99)){
+    return { valid:false };
   }
-  let match = ncs.match(/(\d{2})(\d{2})-([A-Z]{1,2})(\d{0,2})?([A-Z]{0,2})/);
-  if (!match) return "#eeeeee";
-  let lightness = parseInt(match[1]);
-  let chroma = parseInt(match[2]);
-  let hue1 = match[3];
-  let perc = parseInt(match[4] || "0");
-  let hue2 = match[5] || '';
-  const base = {
-    N: [220,220,220], Y: [255,245,80], R: [240,50,50], B: [80,160,255], G: [80,220,120]
-  };
-  let rgb1 = base[hue1[0]] || [255,255,255];
-  let rgb2 = base[hue2[0]] || [255,255,255];
-  let p = isNaN(perc) ? 0 : perc/100;
-  let rgb = rgb1.map((c,i) => Math.round(c*(1-p) + rgb2[i]*p));
-  let gray = Math.round(255 * (1 - lightness/100));
-  let sat = chroma/100;
-  rgb = rgb.map(c => Math.round(c*sat + gray*(1-sat)));
+
+  let h1 = m[2] || "";
+  let perc = m[3];
+  let h2 = m[4] || "";
+
+  if (h1.length === 2 && !h2){ h2 = h1[1]; h1 = h1[0]; }
+
+  if (h1 === "N"){
+    if (cn !== 0) return { valid:false };
+    return { valid:true, code:`S${m[1]}-N`, b:bn, c:cn, hue1:"N", perc:0, hue2:"" };
+  }
+  if (cn === 0) return { valid:false };
+
+  if (!baseHues.includes(h1)) return { valid:false };
+  if (h2){
+    if (!baseHues.includes(h2)) return { valid:false };
+    if (!neighborPairs.has(h1+h2)) return { valid:false };
+    const p = parseInt(perc || "NaN",10);
+    if (!(p >= 1 && p <= 99)) return { valid:false };
+    return { valid:true, code:`S${m[1]}-${h1}${p}${h2}`, b:bn, c:cn, hue1:h1, perc:p, hue2:h2 };
+  }
+  return { valid:true, code:`S${m[1]}-${h1}`, b:bn, c:cn, hue1:h1, perc:0, hue2:"" };
+}
+
+/* ===================== PODGLĄD KOLORU ===================== */
+const HUE_RGB = { Y:[255,234,50], R:[230,60,60], B:[70,120,255], G:[80,210,120] };
+function lerp(a,b,t){ return a.map((v,i)=>Math.round(v*(1-t)+b[i]*t)); }
+function ncsToHexBetter(parsed){
+  const whiteness = Math.max(0, 1 - (parsed.b + parsed.c)/100);
+  const blackness = parsed.b/100;
+
+  let mix = [200,200,200];
+  if (parsed.hue1 === "N"){
+    mix = [255,255,255];
+  } else {
+    const base1 = HUE_RGB[parsed.hue1];
+    const base2 = parsed.hue2 ? HUE_RGB[parsed.hue2] : base1;
+    const t = parsed.hue2 ? (parsed.perc/100) : 0;
+    mix = lerp(base1, base2, t);
+  }
+  let rgb = lerp(mix, [255,255,255], whiteness);
+  rgb = lerp(rgb, [0,0,0], blackness);
   return '#' + rgb.map(x=>x.toString(16).padStart(2,'0')).join('');
 }
 
-// PODPOWIEDZI: 2 najbardziej typowe
-function getSuggestions(input) {
-  let c = input.replace(/\s+/g, '').toUpperCase();
-  if (/^S?\d{4}$/.test(c)) return ['S ' + c.replace(/^S?/,'') + '-N'];
-  let fourDigits = c.match(/^S?(\d{4})(.*)$/);
-  if (fourDigits && fourDigits[2].length < 4) {
-    return [
-      'S ' + fourDigits[1] + '-N',
-      'S ' + fourDigits[1] + '-Y'
-    ];
-  }
-  let digitsAndSuffix = c.match(/^S?(\d{4})-([A-Z]*)$/);
-  if (digitsAndSuffix && !mainHues.includes(digitsAndSuffix[2])) {
-    return mainHues.slice(0, 2).map(h => 'S ' + digitsAndSuffix[1] + '-' + h);
-  }
-  return [];
+/* ===================== MAŁY WZORNIK ===================== */
+function isSmallSample(code){
+  const c = (code || "").replace(/\s+/g,'').toUpperCase();
+  if (/^S?\d{4}$/.test(c)) return false;
+  const m = c.match(/^S?0*([0-9]{1,3})$/);
+  if (!m) return false;
+  const val = parseInt(m[1],10);
+  return val >= 1 && val <= 224;
 }
 
-function calculatePrice() {
-  const input = document.getElementById("ncsInput").value.trim();
-  const inputNoSpaces = input.replace(/\s+/g, '');
+/* ===================== TRACKING W LINKACH ===================== */
+function withTracking(url, ncs){
+  try{
+    const u = new URL(url);
+    u.searchParams.set('utm_source','kalkulator');
+    u.searchParams.set('utm_medium','web');
+    u.searchParams.set('utm_campaign','color_matt_ncs');
+    if (ncs) u.searchParams.set('ncs', ncs);
+    return u.toString();
+  }catch(e){ return url; }
+}
+
+/* ===================== PODPOWIEDZI (z procentami, np. Y50R) ===================== */
+const POPULAR = [
+  "S 0500-N","S 0502-Y","S 1000-N","S 1002-Y","S 1500-N",
+  "S 2005-G80Y","S 2502-Y","S 3005-Y50R","S 3502-Y","S 5000-N"
+];
+const PERC_STEPS = [5,10,20,30,40,50,60,70,80,90];
+
+const RECENTS_KEY = "ncs_recent_v1";
+function getRecents(){
+  try{
+    const raw = localStorage.getItem(RECENTS_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  }catch(e){ return []; }
+}
+function saveRecent(value){
+  if (!value) return;
+  const val = value.toUpperCase().trim();
+  let list = getRecents().filter(v => v !== val);
+  list.unshift(val);
+  if (list.length > 5) list = list.slice(0,5);
+  try{ localStorage.setItem(RECENTS_KEY, JSON.stringify(list)); }catch(e){}
+}
+
+function neighborOf(h){
+  return ({Y:"R", R:"Y", G:"B", B:"G"})[h] || null;
+}
+
+function buildSuggestions(input){
+  const s = (input||"").toUpperCase().replace(/\s+/g,'');
+  const out = [];
+
+  // 0) Ostatnie wyszukania – na górze
+  getRecents().forEach(v => out.push(v));
+
+  // 1) Popularne – gdy brak wpisu lub bardzo krótko
+  if (!s || s.length < 2){ POPULAR.forEach(v => out.push(v)); }
+
+  // 2) 4 cyfry (z S lub bez): jeżeli chroma == 00 ⇒ tylko N, w p.p. szybkie propozycje bazowe
+  const m4 = s.match(/^S?(\d{4})$/);
+  if (m4){
+    const d = m4[1];
+    const chroma = parseInt(d.slice(2,4),10);
+    if (chroma === 0){
+      out.push(`S ${d}-N`);
+    }else{
+      ["Y","R","G","B","GY","YR","RB","BG"].forEach(h=>out.push(`S ${d}-${h}`));
+    }
+  }
+
+  // 3) Wzorzec z jedną lub dwiema literami i ewentualnym procentem
+  const mHue = s.match(/^S?(\d{4})-([YRBG])(\d{0,2})?([YRBG])?$/);
+  if (mHue){
+    const d = mHue[1];
+    const h1 = mHue[2];
+    const pFrag = mHue[3] || "";       // fragment procentu wpisany przez użytkownika
+    const h2 = mHue[4] || neighborOf(h1);
+
+    if (h2 && neighborPairs.has(h1+h2)){
+      // Priorytet: dopasowania zaczynające się od wpisanego fragmentu procentu
+      const first = PERC_STEPS.filter(x => (pFrag ? x.toString().startsWith(pFrag) : false));
+      const rest  = PERC_STEPS.filter(x => !pFrag || !x.toString().startsWith(pFrag));
+      [...first, ...rest].forEach(p => out.push(`S ${d}-${h1}${p}${h2}`));
+    }
+  }
+
+  // 4) "S####-" bez liter: rzuć kilka popularnych
+  const m4dash = s.match(/^S?(\d{4})-$/);
+  if (m4dash){
+    const d = m4dash[1];
+    const chroma = parseInt(d.slice(2,4),10);
+    if (chroma === 0) out.push(`S ${d}-N`);
+    else ["Y","R","G","B","GY","YR","RB","BG"].forEach(h=>out.push(`S ${d}-${h}`));
+  }
+
+  // deduplikacja i limit
+  const dedup = Array.from(new Set(out));
+  return dedup.slice(0,10);
+}
+function refreshDatalist(){
+  const list = document.getElementById("ncsList");
+  const val = document.getElementById("ncsInput").value;
+  const suggestions = buildSuggestions(val);
+  list.innerHTML = suggestions.map(s=>`<option value="${s}"></option>`).join('');
+}
+
+/* ===================== AUTO-UZUPEŁNIANIE: XX00 ⇒ -N, inaczej -Y ===================== */
+function autoCompleteDigitsSmart(raw){
+  const trimmed = (raw||"").trim();
+  const s = trimmed.replace(/\s+/g,'').toUpperCase();
+  const m = s.match(/^S?(\d{4})$/);
+  if (m){
+    const d = m[1];
+    const chroma = parseInt(d.slice(2,4),10);
+    const suffix = (chroma === 0) ? 'N' : 'Y';
+    const code = `S ${d}-${suffix}`;
+    const inputEl = document.getElementById("ncsInput");
+    inputEl.value = code;
+    return { value: code, auto: true, autoSuffix: suffix };
+  }
+  return { value: trimmed, auto: false, autoSuffix: null };
+}
+
+/* ===================== GŁÓWNA LOGIKA ===================== */
+const inputEl = document.getElementById("ncsInput");
+const formEl = document.getElementById("calcForm");
+const errorEl = document.getElementById("errorMsg");
+const resultEl = document.getElementById("result");
+const previewEl = document.getElementById("colorPreview");
+const swatchEl = previewEl.querySelector(".swatch");
+const previewLabelEl = document.getElementById("previewLabel");
+
+const price25 = document.getElementById("price25");
+const price5 = document.getElementById("price5");
+const price10 = document.getElementById("price10");
+const buy25 = document.getElementById("buyLink25");
+const buy5  = document.getElementById("buyLink5");
+const buy10 = document.getElementById("buyLink10");
+
+inputEl.addEventListener("input", refreshDatalist);
+inputEl.addEventListener("focus", refreshDatalist);
+
+formEl.addEventListener("submit", function(e){
+  e.preventDefault();
+  calculatePrice();
+});
+
+function calculatePrice(){
+  const ac = autoCompleteDigitsSmart(inputEl.value);
+  const raw = ac.value;
+  const autoCompleted = ac.auto;
+  const autoSuffix = ac.autoSuffix;
+
+  const inputNoSpaces = raw.replace(/\s+/g,'');
   const inputUpper = inputNoSpaces.toUpperCase();
-  const digits = inputUpper.replace(/[^0-9]/g, '').slice(0, 4);
-  const group = getGroup(parseInt(digits));
-  const errorMsg = document.getElementById("errorMsg");
-  const colorPreview = document.getElementById("colorPreview");
 
-  if (!group) {
-    document.getElementById("result").style.display = "none";
-    errorMsg.innerText = "Nieprawidłowy kod NCS. Spróbuj np. S 0502-Y lub S 2060-G30Y.";
-    colorPreview.innerHTML = '';
+  const digits = inputUpper.replace(/[^0-9]/g, '').slice(0,4);
+  const group = getGroup(parseInt(digits,10));
+
+  if (!group){
+    resultEl.style.display = "none";
+    errorEl.innerHTML = "Nieprawidłowy kod. Spróbuj np. <b>S 0502-Y</b>, <b>S 2060-G30Y</b> lub numer 1–224 (mały wzornik).";
+    swatchEl.style.background = "#eee";
+    previewLabelEl.innerHTML = "";
     return;
   }
 
-  // Ceny i linki
-  const prices = {
-    1: { p25: "147,25", p5: "220,00", p10: "349,58",
-      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-2.5L/1341",
-      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-5L/1347",
-      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-1-10L/1353"
-    },
-    2: { p25: "172,17", p5: "257,58", p10: "409,25",
-      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-2.5L/1342",
-      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-5L/1348",
-      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-2-10L/1354"
-    },
-    3: { p25: "197,08", p5: "295,08", p10: "468,33",
-      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-2.5L/1343",
-      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-5L/1349",
-      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-3-10L/1355"
-    },
-    4: { p25: "220,83", p5: "330,92", p10: "525,67",
-      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-2.5L/1344",
-      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-5L/1350",
-      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-4-10L/1356"
-    },
-    5: { p25: "246,23", p5: "368,33", p10: "584,17",
-      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-2.5L/1345",
-      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-5L/1351",
-      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-5-10L/1357"
-    },
-    6: { p25: "272,00", p5: "406,00", p10: "643,00",
-      link25: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-2.5L/1346",
-      link5: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-5L/1352",
-      link10: "https://www.sklepdecowant.pl/pl/p/Color-Matt-NCS-Grupa-6-10L/1358"
-    },
-  };
+  const p = PRICES[group];
+  price25.textContent = p.p25;
+  price5.textContent  = p.p5;
+  price10.textContent = p.p10;
+  buy25.href = p.link25;
+  buy5.href  = p.link5;
+  buy10.href = p.link10;
 
-  const p = prices[group];
-  document.getElementById("price25").innerText = p.p25;
-  document.getElementById("price5").innerText = p.p5;
-  document.getElementById("price10").innerText = p.p10;
-  document.getElementById("buyLink25").href = p.link25;
-  document.getElementById("buyLink5").href = p.link5;
-  document.getElementById("buyLink10").href = p.link10;
-  document.getElementById("result").style.display = "block";
-  errorMsg.innerText = "";
-
-  // 1. Sprawdź czy to numer z małego wzornika (1–224, ale nie 4 cyfry!)
-  if (isSmallSample(inputUpper)) {
-    colorPreview.innerHTML = `
-      <div style="font-size: 14px; color: #b00; margin-top:8px;">
-        Kolor z małego wzornika Color Matt – podgląd niedostępny
-      </div>
-    `;
+  if (isSmallSample(inputUpper)){
+    swatchEl.style.background = "#eee";
+    previewLabelEl.innerHTML = `<div style="font-size:14px;color:#b00">Kolor z małego wzornika Color Matt – podgląd niedostępny</div>`;
+    const ncsParam = inputUpper;
+    buy25.href = withTracking(buy25.href, ncsParam);
+    buy5.href  = withTracking(buy5.href,  ncsParam);
+    buy10.href = withTracking(buy10.href, ncsParam);
+    errorEl.textContent = "";
+    resultEl.style.display = "block";
+    saveRecent(ncsParam);
+    refreshDatalist();
     return;
   }
 
-  // 2. Walidacja kodu NCS: tylko poprawne barwy i format (z S lub bez S)
-  let ncsCode = inputUpper;
-  let ncsCodeWithS = ncsCode.startsWith('S') ? ncsCode : 'S' + ncsCode;
-  // jeśli ktoś wpisał "0502-Y", "1000-N" itp. – zaakceptuj, ale pokaż podpowiedź
-  if (isValidNCS(ncsCodeWithS)) {
-    const hex = ncsToHex(ncsCodeWithS);
-    colorPreview.innerHTML = `
-      <div style="width:90px; height:36px; background:${hex}; border:1px solid #aaa; border-radius:6px;"></div>
-      <div style="font-size: 13px; margin-top: 6px;">
-        Podgląd koloru: <b>${ncsCodeWithS}</b>
-        <br><span style="font-size:11px; color:#888;">Kolor poglądowy – generowany automatycznie (nie jest wzornikiem NCS)</span>
-        ${ncsCode.startsWith('S') ? '' : '<div style="color:#e67e22;margin-top:7px;">Oficjalny kod NCS zaczyna się od litery S.<br>Proponujemy: <b>S ' + ncsCode + '</b></div>'}
-      </div>
-    `;
-  } else {
-    // 3. Wszystko inne – błąd i propozycje
-    const suggestions = getSuggestions(inputUpper);
-    colorPreview.innerHTML = `
-      <div style="font-size: 14px; color: #b00; margin-top:8px;">
-        Nieprawidłowy kod NCS lub barwa.<br>
-        Przykład: <b>S 0502-Y</b> lub <b>S 2060-G30Y</b><br>
-        ${suggestions.length > 0 ? `
-          <span style="color:#444;">
-            Czy chodziło Ci o:<br>
-            ${suggestions.map(s => `<b>${s}</b>`).join(' lub<br>')}
-          </span>` : ''
-        }
-      </div>
-    `;
+  const parsed = parseNCS(inputUpper.startsWith('S') ? inputUpper : ('S'+inputUpper));
+  if (!parsed.valid){
+    resultEl.style.display = "none";
+    errorEl.innerHTML = `Nieprawidłowy kod NCS lub barwa. Przykład: <b>S 0502-Y</b> lub <b>S 2060-G30Y</b>.`;
+    swatchEl.style.background = "#eee";
+    previewLabelEl.innerHTML = "";
+    return;
   }
+
+  const ncsCode = parsed.code;
+  const hex = ncsToHexBetter(parsed);
+  swatchEl.style.background = hex;
+  previewLabelEl.innerHTML = `Podgląd koloru: <b>${ncsCode}</b>${
+    inputUpper.startsWith('S') ? '' : `<div style="color:#e67e22;margin-top:6px">Oficjalny kod zaczyna się od litery S. Proponujemy: <b>${ncsCode}</b></div>`
+  }${ autoCompleted ? `<div style="color:#2e7d32;margin-top:6px">Uzupełniono: wpisano 4 cyfry, przyjęto domyślnie <b>-${autoSuffix}</b>.</div>` : '' }`;
+
+  buy25.href = withTracking(p.link25, ncsCode);
+  buy5.href  = withTracking(p.link5,  ncsCode);
+  buy10.href = withTracking(p.link10, ncsCode);
+
+  errorEl.textContent = "";
+  resultEl.style.display = "block";
+
+  saveRecent(ncsCode);
+  refreshDatalist();
 }
+
+/* ===================== Deep-link: ?ncs= ===================== */
+(function initFromURL(){
+  const qs = new URLSearchParams(location.search);
+  const v = qs.get('ncs');
+  if (v){
+    document.getElementById("ncsInput").value = v;
+    refreshDatalist();
+    calculatePrice();
+  } else {
+    refreshDatalist();
+  }
+})();
 </script>
 
 </body>
