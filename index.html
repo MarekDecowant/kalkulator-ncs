@@ -56,6 +56,29 @@
     .purchase-guide h2{ font-size:16px; margin:0 0 7px; }
     .purchase-guide ol{ margin:0; padding-left:20px; font-size:14px; line-height:1.5; }
     .small-swatch-note{ font-size:14px; color:#754000; line-height:1.4; }
+
+    /* Widok telefonu */
+    @media (max-width:600px){
+      body{padding:12px;max-width:none;}
+      .app{padding:16px;border-radius:12px;}
+      header{flex-direction:column;align-items:flex-start;gap:7px;margin-bottom:14px;}
+      .logo svg{height:32px;width:190px;max-width:100%;}
+      h1{font-size:21px;line-height:1.25;margin-top:5px;}
+      p.lead{font-size:15px;line-height:1.5;margin-bottom:16px;}
+      .controls{grid-template-columns:1fr;gap:9px;}
+      .controls button{width:100%;min-height:48px;}
+      .hint{font-size:12px;line-height:1.45;}
+      .result{margin-top:16px;padding:12px;}
+      .product{display:grid;grid-template-columns:1fr auto;gap:7px 10px;align-items:center;margin:15px 0;}
+      .product strong{min-width:0;}
+      .product a.button{grid-column:1/-1;width:100%;padding:13px 12px;text-align:center;white-space:normal;font-size:15px;}
+      .preview{align-items:flex-start;gap:10px;}
+      .swatch{width:68px;min-width:68px;height:42px;}
+      .purchase-guide{margin-top:16px;padding:12px;}
+      .purchase-guide h2{font-size:16px;}
+      .purchase-guide ol{font-size:13px;padding-left:18px;}
+      .footnote{font-size:11px;line-height:1.45;}
+    }
   </style>
 </head>
 <body>
