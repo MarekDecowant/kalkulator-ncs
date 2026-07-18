@@ -51,6 +51,11 @@
     .error{ color:#b00020; margin-top:10px }
     .bar{ height:6px; background:linear-gradient(90deg, var(--brand-green), var(--brand-orange)); border-radius:999px; margin: 8px 0 16px; }
     .footnote{ font-size:12px; color:#666; margin-top:8px }
+    .result-summary{ margin:0 0 14px; padding:12px; border-radius:10px; background:#f2f8f2; border:1px solid #d9ead9; font-size:14px; line-height:1.45; }
+    .purchase-guide{ margin-top:18px; padding:14px; border-left:4px solid var(--brand-orange); border-radius:8px; background:#fff8f1; }
+    .purchase-guide h2{ font-size:16px; margin:0 0 7px; }
+    .purchase-guide ol{ margin:0; padding-left:20px; font-size:14px; line-height:1.5; }
+    .small-swatch-note{ font-size:14px; color:#754000; line-height:1.4; }
   </style>
 </head>
 <body>
@@ -76,19 +81,20 @@
   <h1>Kalkulator kolorów NCS – Color Matt</h1>
   <div class="bar" aria-hidden="true"></div>
 
-  <p class="lead">Wpisz kod NCS (np. <b>S 0502-Y</b>, <b>S 2060-G30Y</b>) albo numer z małego wzornika (np. <b>1</b>, <b>023</b>, <b>200</b>). Podgląd jest poglądowy.</p>
+  <p class="lead">Wpisz kod NCS (np. <b>S 0502-Y</b>, <b>S 2060-G30Y</b>) albo numer z małego wzornika Fox (np. <b>1</b>, <b>023</b>, <b>200</b>). Dobierzemy właściwą grupę cenową Color Matt.</p>
 
   <form id="calcForm" novalidate>
-    <label for="ncsInput">Kod NCS lub numer z małego wzornika</label>
+    <label for="ncsInput">Kod NCS lub numer z małego wzornika Fox</label>
     <div class="controls">
       <input type="text" id="ncsInput" list="ncsList" placeholder="Np. S 0502-Y, S 2060-G30Y, 025" autocomplete="off" />
       <button type="submit">Szukaj</button>
     </div>
     <datalist id="ncsList"><!-- uzupełniane dynamicznie --></datalist>
-    <div class="hint">Przy <b>chroma = 00</b> (np. 8000) jedynym poprawnym sufiksem jest <b>-N</b>. Po wpisaniu 4 cyfr uzupełnimy: <b>-N</b> dla XX00, w pozostałych przypadkach <b>-Y</b>. Dla sąsiadów (np. Y↔R) podpowiadamy warianty z procentem, np. <b>Y50R</b>.</div>
+    <div class="hint">Przy <b>chroma = 00</b> (np. 9000) jedynym poprawnym sufiksem jest <b>-N</b>. Możesz wpisać też skrót <b>9000N</b> — zapiszemy go jako <b>S 9000-N</b>. Po wpisaniu samych 4 cyfr uzupełnimy: <b>-N</b> dla XX00, w pozostałych przypadkach <b>-Y</b>.</div>
   </form>
 
   <div class="result" id="result" aria-live="polite">
+    <div class="result-summary" id="resultSummary"></div>
     <div class="product"><strong>2.5L:</strong> <span id="price25"></span> zł
       <a id="buyLink25" class="button" href="#" target="_blank" rel="noopener noreferrer">Przejdź do zakupu 2.5L</a>
     </div>
@@ -106,6 +112,15 @@
         <div class="muted">Kolor poglądowy – generowany automatycznie (nie jest wzornikiem NCS).</div>
       </div>
     </div>
+
+    <section class="purchase-guide" aria-label="Instrukcja zakupu">
+      <h2>Jak kupić farbę?</h2>
+      <ol>
+        <li>Sprawdź rozpoznany kod lub numer wzornika i wybierz pojemność.</li>
+        <li>Kliknij przycisk „Przejdź do zakupu”.</li>
+        <li>Na karcie produktu wpisz ten sam kod lub numer wzornika i dodaj farbę do koszyka.</li>
+      </ol>
+    </section>
   </div>
 
   <div class="error" id="errorMsg" role="alert" aria-live="assertive"></div>
@@ -321,6 +336,14 @@ function refreshDatalist(){
 function autoCompleteDigitsSmart(raw){
   const trimmed = (raw||"").trim();
   const s = trimmed.replace(/\s+/g,'').toUpperCase();
+  const compactNeutral = s.match(/^S?(\d{4})N$/);
+  if (compactNeutral){
+    const d = compactNeutral[1];
+    const code = `S ${d}-N`;
+    const inputEl = document.getElementById("ncsInput");
+    inputEl.value = code;
+    return { value: code, auto: true, autoSuffix: 'N', autoNotice: `Rozpoznano zapis bez myślnika: <b>${code}</b>.` };
+  }
   const m = s.match(/^S?(\d{4})$/);
   if (m){
     const d = m[1];
@@ -329,9 +352,9 @@ function autoCompleteDigitsSmart(raw){
     const code = `S ${d}-${suffix}`;
     const inputEl = document.getElementById("ncsInput");
     inputEl.value = code;
-    return { value: code, auto: true, autoSuffix: suffix };
+    return { value: code, auto: true, autoSuffix: suffix, autoNotice: `Wpisano 4 cyfry, przyjęto domyślnie <b>-${suffix}</b>.` };
   }
-  return { value: trimmed, auto: false, autoSuffix: null };
+  return { value: trimmed, auto: false, autoSuffix: null, autoNotice: null };
 }
 
 /* ===================== GŁÓWNA LOGIKA ===================== */
@@ -342,6 +365,7 @@ const resultEl = document.getElementById("result");
 const previewEl = document.getElementById("colorPreview");
 const swatchEl = previewEl.querySelector(".swatch");
 const previewLabelEl = document.getElementById("previewLabel");
+const resultSummaryEl = document.getElementById("resultSummary");
 
 const price25 = document.getElementById("price25");
 const price5 = document.getElementById("price5");
@@ -363,6 +387,7 @@ function calculatePrice(){
   const raw = ac.value;
   const autoCompleted = ac.auto;
   const autoSuffix = ac.autoSuffix;
+  const autoNotice = ac.autoNotice;
 
   const inputNoSpaces = raw.replace(/\s+/g,'');
   const inputUpper = inputNoSpaces.toUpperCase();
@@ -372,6 +397,7 @@ function calculatePrice(){
 
   if (!group){
     resultEl.style.display = "none";
+    resultSummaryEl.innerHTML = "";
     errorEl.innerHTML = "Nieprawidłowy kod. Spróbuj np. <b>S 0502-Y</b>, <b>S 2060-G30Y</b> lub numer 1–224 (mały wzornik).";
     swatchEl.style.background = "#eee";
     previewLabelEl.innerHTML = "";
@@ -388,8 +414,9 @@ function calculatePrice(){
 
   if (isSmallSample(inputUpper)){
     swatchEl.style.background = "#eee";
-    previewLabelEl.innerHTML = `<div style="font-size:14px;color:#b00">Kolor z małego wzornika Color Matt – podgląd niedostępny</div>`;
+    previewLabelEl.innerHTML = `<div class="small-swatch-note"><b>Numer ${inputUpper} z małego wzornika Fox.</b><br>Nie pokazujemy koloru na ekranie, aby nie sugerować nieoficjalnego podglądu.</div>`;
     const ncsParam = inputUpper;
+    resultSummaryEl.innerHTML = `<b>Rozpoznano numer z małego wzornika Fox: ${ncsParam}.</b><br>Wybraliśmy odpowiednią grupę cenową Color Matt.`;
     buy25.href = withTracking(buy25.href, ncsParam);
     buy5.href  = withTracking(buy5.href,  ncsParam);
     buy10.href = withTracking(buy10.href, ncsParam);
@@ -403,6 +430,7 @@ function calculatePrice(){
   const parsed = parseNCS(inputUpper.startsWith('S') ? inputUpper : ('S'+inputUpper));
   if (!parsed.valid){
     resultEl.style.display = "none";
+    resultSummaryEl.innerHTML = "";
     errorEl.innerHTML = `Nieprawidłowy kod NCS lub barwa. Przykład: <b>S 0502-Y</b> lub <b>S 2060-G30Y</b>.`;
     swatchEl.style.background = "#eee";
     previewLabelEl.innerHTML = "";
@@ -414,7 +442,8 @@ function calculatePrice(){
   swatchEl.style.background = hex;
   previewLabelEl.innerHTML = `Podgląd koloru: <b>${ncsCode}</b>${
     inputUpper.startsWith('S') ? '' : `<div style="color:#e67e22;margin-top:6px">Oficjalny kod zaczyna się od litery S. Proponujemy: <b>${ncsCode}</b></div>`
-  }${ autoCompleted ? `<div style="color:#2e7d32;margin-top:6px">Uzupełniono: wpisano 4 cyfry, przyjęto domyślnie <b>-${autoSuffix}</b>.</div>` : '' }`;
+  }${ autoCompleted ? `<div style="color:#2e7d32;margin-top:6px">${autoNotice}</div>` : '' }`;
+  resultSummaryEl.innerHTML = `<b>Rozpoznany kod NCS: ${ncsCode}.</b><br>Wybraliśmy grupę cenową Color Matt: <b>${group}</b>.`;
 
   buy25.href = withTracking(p.link25, ncsCode);
   buy5.href  = withTracking(p.link5,  ncsCode);
