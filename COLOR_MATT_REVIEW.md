@@ -30,9 +30,17 @@ Atlas nie zapisuje grup Decowant 1–6. W tej wersji przygotowano porównanie wy
 
 Po tych decyzjach należy wygenerować ostateczne mapowanie i usunąć oznaczenia wersji testowej. Nie należy scalać tego kandydata na produkcję bez kalibracji.
 
+## Doradcze wyliczenie ilości farby
+
+Opcjonalna sekcja „Ile farby zamówić?” przyjmuje powierzchnię ścian lub sufitu w m² oraz wybór 1 albo 2 warstw (domyślnie 2). Obsługuje przecinek i kropkę dziesiętną. Wynik aktualizuje się podczas wpisywania i jest niezależny od kodu koloru. Puste lub błędne pole metrażu nie blokuje wyceny ani linków zakupowych.
+
+Obliczenie: `powierzchnia × liczba warstw / 14`. [Karta techniczna Color Matt, sekcja „Wydajność”](https://www.atlas.com.pl/wp-content/uploads/2026/08/d05b47c49c0641704dbca1fcc666b978b4b2d3c6_pl_7904_20211103_085814.pdf), udostępniona na [stronie Atlasa](https://www.atlas.com.pl/produkt/color-matt/), podaje do 14 m²/l przy jednej warstwie na gładkiej powierzchni. Źródło sprawdzone 21.09.2026. Interfejs wyjaśnia, że wynik jest orientacyjny, zużycie zależy od podłoża i aplikacji, a osobny podkład i dodatkowy zapas na poprawki nie są uwzględnione.
+
+Propozycja opakowań zaokrągla ilość w górę do pełnych 2,5 l, a następnie dobiera możliwie małą liczbę wiader 10 / 5 / 2,5 l. Nie oblicza nowej ceny, nie wybiera grupy ani nie dodaje nic do koszyka. Przykładowo 35 m² przy jednej warstwie daje 2,5 l, przy dwóch 5 l; 42,5 m² przy dwóch warstwach daje około 6,08 l i propozycję 5 l + 2,5 l.
+
 ## Walidacja
 
-`node tests/color-matt.test.cjs` — test wszystkich 2272 kodów i trzech pojemności, cen grup, blokad, linków, nieobsługiwanych kodów, podpowiedzi, historii oraz adresów `?ncs=`.
+`node tests/color-matt.test.cjs` — test wszystkich 2272 kodów i trzech pojemności, cen grup, blokad, linków, nieobsługiwanych kodów, podpowiedzi, historii oraz adresów `?ncs=`. Dodatkowo: ilość farby dla 1/2 warstw, przecinek/kropka, granice opakowań i zaokrąglenia, zdarzenia formularza, puste/błędne dane oraz niezależność porady od wyceny.
 
 Osobno lokalnie porównano wszystkie 2274 receptury z wyliczeniem referencyjnym i sprawdzono, że blok `PRICES` jest identyczny z wersją wyjściową. Test w Chromium nie został wykonany: środowisko nie zawiera binarnego pliku przeglądarki. Układ bazuje na dotychczasowym HTML/CSS.
 
