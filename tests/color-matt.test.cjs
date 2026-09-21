@@ -42,7 +42,7 @@ for (const row of Object.values(records)) {
   env.element('ncsInput').value=row.code;env.run('calculatePrice()');
   for(const [sz,pid,bid,key,linkKey] of [[2.5,'price25','buyLink25','p25','link25'],[5,'price5','buyLink5','p5','link5'],[10,'price10','buyLink10','p10','link10']]) {
     const button=env.element(bid);
-    if(row.group===null || (sz===2.5&&row.blocked25)) assert.equal(button.href,undefined,row.code+' disabled '+sz);
+    if(row.group===null) assert.equal(button.href,undefined,row.code+' disabled '+sz);
     else {
       assert.equal(env.element(pid).textContent,prices[row.group][key]);
       const url=new URL(button.href);assert.equal(url.searchParams.get('ncs'),row.code);
@@ -59,4 +59,12 @@ for(const id of ['buyLink25','buyLink5','buyLink10']) assert.equal(env.element(i
 assert.equal(makeContext('?ncs=1305-B34G').element('result').style.display,'none');
 assert.equal(makeContext('?ncs=013').element('result').style.display,'block');
 assert.equal(records['S3040-B'].manualReason,'multiple_bases');
+for (const code of ['001','002','S 0500-N']) {
+  env.element('ncsInput').value=code;env.run('calculatePrice()');
+  assert(env.element('buyLink25').href,code+' available in 2.5L');
+  assert.equal(env.element('price25').textContent,prices[env.run(`lookupColor(${JSON.stringify(code)}).group`)].p25);
+}
+assert(!candidate.includes('Niedostępne 2,5 l'));
+assert(!candidate.includes('Baza Atlas wyklucza'));
+assert(Object.values(records).every(row=>!('blocked25' in row)));
 console.log('PASS: 2272 unique codes, all group prices, product links, normalized and invalid inputs, manufacturer restrictions, 3-size links, deep links, suggestions, recent-input injection and stale links.');
