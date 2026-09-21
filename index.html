@@ -122,7 +122,6 @@
 
   <p class="lead">Wpisz kod NCS (np. <b>S 0502-Y</b>, <b>S 2060-G30Y</b>) albo numer z małego wzornika Fox (np. <b>1</b>, <b>023</b>, <b>200</b>). Dobierzemy właściwą grupę cenową Color Matt.</p>
 
-  <p class="result-summary" id="reviewNotice"><b>Wersja testowa — propozycja grup do sprawdzenia.</b> Ceny grup są bez zmian. Ta wersja nie zastępuje jeszcze kalkulatora sklepu.</p>
   <form id="calcForm" novalidate>
     <label for="ncsInput">Kod NCS lub numer z małego wzornika Fox</label>
     <div class="controls">
@@ -332,7 +331,7 @@ function calculatePrice() {
     const compact = suggestionFragment(inputEl.value);
     errorEl.textContent = /^\d{4}$/.test(compact)
       ? 'Podaj pełny kod NCS z oznaczeniem barwy po myślniku. Wybierz dostępny kolor z podpowiedzi.'
-      : 'Brak receptury Color Matt dla tego kodu w bazie Atlas. Sprawdź pełny kod NCS lub numer 001–224 z małego wzornika FOX.';
+      : 'Brak receptury Color Matt dla tego kodu w bazie. Sprawdź pełny kod NCS lub numer 001–224 z małego wzornika FOX.';
     inputEl.setAttribute('aria-invalid','true');
     refreshDatalist();
     return;
