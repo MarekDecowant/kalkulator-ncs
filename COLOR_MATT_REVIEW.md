@@ -1,5 +1,7 @@
 # Color Matt — kandydat do przeglądu, bez wdrożenia
 
+**Aktualizacja 21.09.2026:** po obejrzeniu wersji testowej właściciel poprosił o usunięcie słowa „Atlas” ze zdania o braku receptury oraz o publikację kalkulatora. Wersja do publikacji zawiera poradę dotyczącą ilości farby, zachowuje dotychczasowe 18 cen i mapowanie grup z przedstawionego kandydata, a z interfejsu usuwa baner wersji testowej. Polecenie publikacji nie stanowi technicznego potwierdzenia interpretacji stawek ani porównania z programem Windows. Poniżej pozostawiono wcześniejsze ustalenia i ograniczenia przeglądu.
+
 Status: **propozycja przypisania do grup; nie zatwierdzono reguły cenowej**.
 
 Dotychczasowy kalkulator rozpoznawał sam zapis NCS, a grupę wyznaczał z pierwszych czterech cyfr. W efekcie przyjmował nieobsługiwane kolory, np. 1305-B34G, i przypisywał wszystkie numery małego wzornika do grupy 1.
