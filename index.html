@@ -133,6 +133,33 @@
     <div class="hint">Podaj pełny kod NCS lub numer 001–224. Podpowiedzi pokazują wyłącznie kolory z bazy Color Matt. Same cztery cyfry nie wybierają odcienia za Ciebie.</div>
   </form>
 
+  <section class="paint-advice" id="ile-farby" aria-labelledby="paintAdviceTitle">
+    <h2 id="paintAdviceTitle">Ile farby zamówić? <span>(opcjonalnie)</span></h2>
+    <p>Podaj metraż i wybierz liczbę warstw, aby sprawdzić orientacyjną ilość Color Matt.</p>
+    <div class="paint-fields">
+      <div>
+        <label for="paintArea">Powierzchnia do pomalowania (m²)</label>
+        <input id="paintArea" type="text" inputmode="decimal" placeholder="Np. 42,5" autocomplete="off" aria-describedby="paintAreaHelp paintAreaError" />
+      </div>
+      <div>
+        <label for="paintCoats">Liczba warstw</label>
+        <select id="paintCoats">
+          <option value="1">1 warstwa</option>
+          <option value="2" selected>2 warstwy</option>
+        </select>
+      </div>
+    </div>
+    <p class="paint-help" id="paintAreaHelp">Wpisz powierzchnię ścian lub sufitu, które malujesz. Możesz pozostawić pole puste.</p>
+    <div class="error" id="paintAreaError" aria-live="polite"></div>
+    <div aria-live="polite" aria-atomic="true">
+      <div class="paint-estimate" id="paintQuantityResult" hidden>
+        <strong id="paintLitres"></strong>
+        <div id="paintPacks"></div>
+      </div>
+    </div>
+    <p class="paint-basis">Wynik jest doradczy. Obliczenie przy wydajności do 14 m²/l na jedną warstwę na gładkim podłożu, zgodnie z <a href="https://www.atlas.com.pl/produkt/color-matt/" target="_blank" rel="noopener noreferrer">danymi producenta</a>. Zużycie zależy od chłonności podłoża i sposobu nakładania. Wyliczenie nie obejmuje osobnego podkładu ani dodatkowego zapasu na poprawki.</p>
+  </section>
+
   <div class="result" id="result" aria-live="polite">
     <div class="result-summary" id="resultSummary"></div>
     <div class="product"><strong>2.5L:</strong> <span id="price25"></span> zł
@@ -165,34 +192,6 @@
   </div>
 
   <div class="error" id="errorMsg" role="alert" aria-live="assertive"></div>
-
-  <section class="paint-advice" aria-labelledby="paintAdviceTitle">
-    <h2 id="paintAdviceTitle">Ile farby zamówić? <span>(opcjonalnie)</span></h2>
-    <p>Podaj metraż i wybierz liczbę warstw, aby sprawdzić orientacyjną ilość Color Matt.</p>
-    <div class="paint-fields">
-      <div>
-        <label for="paintArea">Powierzchnia do pomalowania (m²)</label>
-        <input id="paintArea" type="text" inputmode="decimal" placeholder="Np. 42,5" autocomplete="off" aria-describedby="paintAreaHelp paintAreaError" />
-      </div>
-      <div>
-        <label for="paintCoats">Liczba warstw</label>
-        <select id="paintCoats">
-          <option value="1">1 warstwa</option>
-          <option value="2" selected>2 warstwy</option>
-        </select>
-      </div>
-    </div>
-    <p class="paint-help" id="paintAreaHelp">Wpisz powierzchnię ścian lub sufitu, które malujesz. Możesz pozostawić pole puste.</p>
-    <div class="error" id="paintAreaError" aria-live="polite"></div>
-    <div aria-live="polite" aria-atomic="true">
-      <div class="paint-estimate" id="paintQuantityResult" hidden>
-        <strong id="paintLitres"></strong>
-        <div id="paintPacks"></div>
-      </div>
-    </div>
-    <p class="paint-basis">Wynik jest doradczy. Obliczenie przy wydajności do 14 m²/l na jedną warstwę na gładkim podłożu, zgodnie z <a href="https://www.atlas.com.pl/produkt/color-matt/" target="_blank" rel="noopener noreferrer">danymi producenta</a>. Zużycie zależy od chłonności podłoża i sposobu nakładania. Wyliczenie nie obejmuje osobnego podkładu ani dodatkowego zapasu na poprawki.</p>
-  </section>
-
   <div class="footnote">Na kartach produktów cena/wybór grupy są ustalone – kalkulator pomaga dobrać właściwą kartę i pamięta Twój kod.</div>
 </div>
 
