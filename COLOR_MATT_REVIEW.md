@@ -12,7 +12,7 @@ Zmiana zastępuje te przybliżenia zamkniętą listą receptur `Fox CM` z dostar
 - Nieznany kod nie dostaje ceny ani linku zakupowego. Edycja pola natychmiast usuwa poprzedni wynik i linki.
 - Cztery cyfry bez barwy nie są automatycznie uzupełniane o `-Y`.
 - Podpowiedzi i historia zawierają wyłącznie kody z bazy Color Matt. Obsługiwane są pełne zapisy ze spacjami, bez myślnika i z prefiksem NCS; numery wzornika są zapisywane jako trzy cyfry.
-- 175 receptur z zakazem produkcji 2,5 l blokuje wyłącznie to opakowanie.
+- Brak wykluczeń ze względu na pojemność. Właściciel DECOWANT potwierdził 21.09.2026, że mieszalnik dozuje również kolory oznaczone w 175 recepturach Atlasa ostrzeżeniem dotyczącym 2,5 l. Te ostrzeżenia nie blokują ceny ani zakupu i nie są wyświetlane klientom.
 - 196 receptur wymaga barwionego podkładu — komunikat pochodzi z pola `substrate`.
 - Kody `S 3040-B` i `S 3040-B10G` mają po dwie różne receptury na różnych bazach. Do czasu wyboru receptury wymagają kontaktu ze sklepem.
 - Podgląd pochodzi z pola RGB danych producenta; dla brakujących wartości nie powstaje wymyślony kolor. Nie jest to gwarancja zgodności ekranowej z fizyczną próbką.
